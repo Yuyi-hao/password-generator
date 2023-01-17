@@ -7,8 +7,6 @@ lower_case = list(string.ascii_lowercase)
 upper_case = list(string.ascii_uppercase)
 digits = list(string.digits)
 punctuation = list(string.punctuation)
-
-
 characters_lst = [lower_case, upper_case, digits, punctuation]
 
 
@@ -28,10 +26,10 @@ def get_pass(length:int, password_type:int) -> str:
             password = "".join(random.choices(digits, k=length))
         case "memorable":
             for i in range(length):
-                random_weight = random.randint(0, 100)
+                random_weight = random.randint(1, 80)
                 lst = random.choices(
                     characters_lst[:2],
-                    cum_weights=(random_weight, 100-random_weight),
+                    cum_weights=(random_weight, abs(100-random_weight)),
                     k=1
                 )[0]
                 password += random.choice(lst)

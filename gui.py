@@ -1,7 +1,7 @@
 import sys
-
-from PyQt5.QtGui import QPixmap, QIcon, QClipboard
-from PyQt5 import QtWidgets
+from main import get_pass
+from PyQt5 import QtGui
+from PyQt5.QtGui import QPixmap, QIcon, QIntValidator
 from PyQt5.QtWidgets import (
     QApplication,
     QHBoxLayout,
@@ -9,8 +9,9 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QLabel,
     QWidget,
-    QMainWindow, QComboBox, QRadioButton, QLineEdit, QCheckBox
+    QMainWindow, QComboBox, QRadioButton, QLineEdit, QCheckBox, QButtonGroup
 )
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -23,6 +24,9 @@ class MainWindow(QMainWindow):
         self.length_combo = QComboBox()
         self.length_combo.setEditable(True)
         self.length_combo.addItems([str(i) for i in range(4, 32, 2)])
+        only_int = QIntValidator()
+        only_int.setRange(4, 50)
+        self.length_combo.setValidator(only_int)
         first_block.addWidget(QLabel("Enter password length: "))
         first_block.addWidget(self.length_combo)
         layout.addLayout(first_block)
@@ -47,6 +51,15 @@ class MainWindow(QMainWindow):
         r_default.setText("Default")
         r_default.setToolTip("Same as strong")
         type_layout.addWidget(r_default)
+        self.type_btn_grp = QButtonGroup()
+        self.type_btn_grp.addButton(r_pin)
+        self.type_btn_grp.addButton(r_memorable)
+        self.type_btn_grp.addButton(r_strong)
+        self.type_btn_grp.addButton(r_default)
+        self.type_btn_grp.setId(r_pin, 1)
+        self.type_btn_grp.setId(r_memorable, 2)
+        self.type_btn_grp.setId(r_strong, 3)
+        self.type_btn_grp.setId(r_default, 4)
         second_block.addLayout(type_layout)
         layout.addLayout(second_block)
 
@@ -60,7 +73,7 @@ class MainWindow(QMainWindow):
         self.copy_btn = QPushButton()
         self.copy_btn.clicked.connect(self.copy_pass)
         # set icon for copy btn
-        pixmap = QPixmap("copy_iconpng.png")
+        pixmap = QPixmap("copy_icon.png")
         icon = QIcon(pixmap)
         self.copy_btn.setIcon(icon)
         third_block.addWidget(self.generated_pass)
@@ -86,13 +99,18 @@ class MainWindow(QMainWindow):
             self.generated_pass.setReadOnly(True)
 
     def copy_pass(self):
-        cb = QtGui.QApplication.clipboard()
+
+        cb = QtGui.QGuiApplication.clipboard()
         cb.clear(mode=cb.Clipboard)
-        cb.setText("Clipboard Text", mode=cb.Clipboard)
+        if self.generated_pass.text:
+            cb.setText(str(self.generated_pass.text()), mode=cb.Clipboard)
+        else:
+            pass
 
     def generate_pass(self):
-        pass
-
+        pass_length = int(self.length_combo.currentText())
+        type_pass = int(self.type_btn_grp.checkedId())
+        self.generated_pass.setText(f"{get_pass(pass_length, type_pass)}")
 
 
 if __name__ == "__main__":
